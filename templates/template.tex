@@ -4,6 +4,7 @@ $if(fontfamily)$
 $else$
 \usepackage{lmodern}
 \usepackage{savetrees}
+\usepackage{multicol}
 $endif$
 $if(linestretch)$
 \usepackage{setspace}
@@ -203,6 +204,7 @@ $endif$
 \date{$date$}
 
 \begin{document}
+\begin{multicols}{2}
 $if(title)$
 \maketitle
 $endif$
@@ -254,4 +256,6 @@ $for(include-after)$
 $include-after$
 
 $endfor$
+\end{multicols}
+
 \end{document}
