@@ -410,3 +410,19 @@ A polar coordinate is represented as $\rho = x\sin{(\theta)} + y\sin{(\theta)}$.
 Hough is transformed from Cartesian to polar coordinate space, it becomes a sinusoidal curve -- but
 it is important to note that the principle of intersecting lines in $(m, c)$ space defining the
 best-fitting line in $(x, y)$ space remains the same.
+
+##### RANSAC (RAndom SAmple Consensus)
+
+RANSAC is a simple line-fitting algorithm based in probability theory. The idea is that outliers in
+a dataset (e.g. noise and other stuff) pull the fitted line away from where it should be -- the
+*inliers*.
+
+The algorithm works like this (on a simple level):
+
+* Repeat many times:
+    * Fit a model to a random subset of the points (samples)
+    * Build a consensus set: other points that fit the model
+    * Evaluate quality of the model: size or total error of the consensus set
+* Rebuild model with best "consensus set"
+* Number of iterations can be estimated based on sample size, probability of outliers, error
+  threshold, and other factors
