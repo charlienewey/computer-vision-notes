@@ -268,3 +268,47 @@ We need to know what the *real* colour is, to correct for colour effects of an o
 this by looking at the colour of something we definitely know. Cameras can also be calibrated for
 lens distortion with "chessboard"-type images. The parallel lines and constrasting squares make it
 easy to discern straight lines.
+
+
+## Edges
+
+### Detection
+
+Images of the world are perceived as *regions* surrounded by *boundaries*. The *boundaries* are made
+up of *edges* at the pixel level. However, edges aren't always evidence for boundaries -- they can
+be due to lighting changes or other phenomena.
+
+#### Edges as Intensity Changes
+
+Differentiate the intensity profile of an image and look for very high or low values.
+Differentiation of digital functions is easy_...
+$$ f(x) = x_{0}, x_{1}, x_{2}, x_{3} ..., x_{n} $$
+$$ \frac{df}{dx} \approx \frac{x_{2} - x_{0}}{2}, \frac{x_{3} - x_{1}}{2}, ... , \frac{x_{n - 2} - x_{n}}{2} $$
+
+You can also achieve the same result by "dragging" a differential mask (or kernel) over an image.
+For example, a $[-1, 0, 1]$ mask dragged across an image will differentiate in one direction. This
+is called *convolution*.
+
+#### The Sobel Edge Detector
+
+The edge signal is usually noisy -- a $3x3$ kernel will have a local averaging effect. The Sobel
+edge detector (developed in 1968) has this effect, and is still commonly used.
+
+$$
+\begin{bmatrix}
+    -1 & 0 & 1 \\
+    -2 & 0 & 2 \\
+    -1 & 0 & 1 \\
+\end{bmatrix}
+$$
+
+
+##### Sobel Tricks
+
+Combination of *horizontal* and *vertical* responses:
+$$ S(x) = \sqrt{S_{h}(x)^2 + S_{v}(x)^2} $$
+
+Edge direction computation:
+$$ \theta(x) = tan^{-1}(S_{h}(x) / S_{v}(x)) $$
+
+*Note*: This computation is also useful in many other algorithms that involve edge direction.
