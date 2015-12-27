@@ -230,7 +230,7 @@ frequency response ranges, etc.).
 #### Other Camera Types
 
 * Omni-directional cameras -- either a rotating flat mirror, or a fixed hyperbolic
-    * Fixed hyperbolic mirrors distort the living poop out of an image
+    * Hyperbolic mirrors distort... lots
     * Non-homogeneous resolution
     * Lots of maths to untangle the image into something same
 * Parallel projection
