@@ -1,10 +1,9 @@
-\documentclass[$if(fontsize)$$fontsize$,$endif$$if(lang)$$babel-lang$,$endif$$if(papersize)$$papersize$paper,$endif$$for(classoption)$$classoption$$sep$,$endfor$]{$documentclass$}
+\documentclass[twocolumn,$if(fontsize)$$fontsize$,$endif$$if(lang)$$babel-lang$,$endif$$if(papersize)$$papersize$paper,$endif$$for(classoption)$$classoption$$sep$,$endfor$]{$documentclass$}
 $if(fontfamily)$
 \usepackage[$for(fontfamilyoptions)$$fontfamilyoptions$$sep$,$endfor$]{$fontfamily$}
 $else$
 \usepackage{lmodern}
-\usepackage{savetrees}
-\usepackage{multicol}
+\usepackage[extreme]{savetrees}
 $endif$
 $if(linestretch)$
 \usepackage{setspace}
@@ -130,7 +129,7 @@ $if(graphics)$
 % Scale images if necessary, so that they will not overflow the page
 % margins by default, and it is still possible to overwrite the defaults
 % using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setkeys{Gin}{width=\linewidth,height=\maxheight,keepaspectratio}
 $endif$
 $if(links-as-notes)$
 % Make links footnotes instead of hotlinks:
@@ -204,7 +203,7 @@ $endif$
 \date{$date$}
 
 \begin{document}
-\begin{multicols}{2}
+\pagenumbering{gobble}
 $if(title)$
 \maketitle
 $endif$
@@ -256,6 +255,4 @@ $for(include-after)$
 $include-after$
 
 $endfor$
-\end{multicols}
-
 \end{document}
