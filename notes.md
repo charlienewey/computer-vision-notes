@@ -239,16 +239,11 @@ frequency response ranges, etc.).
 
 ## Radiosity
 
-Brightness depends on several things, including the amount of light hitting a surface (source
-intensity), the amount of light that leaves the surface (closely related to absorption rate of
-surface), the relative positions of light source and camera (and orientation of surface), and the
-nature of the surface (texture, colour, etc.).
+Brightness depends on: the amount of light hitting a surface (source intensity), the amount of light that leaves the surface (related to absorption rate), relative positions of light source and camera, and the orientation of the surface.
 
-There are two different types of reflection that are commonly found on surfaces: Lambertian and
-specular. On Lambertian surfaces, the brightness is independent of viewpoint, and it only depends on
-the angle between the light source and the surface. Specular reflection depends on the location of
-the viewer (for example, "highlights" on a reflective surface).
-
+There are two different types of reflection: Lambertian and specular. On Lambertian surfaces, the
+brightness only depends on the angle between the light source and the surface. Specular reflection
+(e.g. a "highlight" on a reflective surface) depends on the location of the viewer.
 
 ## Digitisation
 
@@ -270,4 +265,6 @@ resolution. Obviously data is lost when images are captured.
 ### Calibration
 
 We need to know what the *real* colour is, to correct for colour effects of an optical device. We do
-this by looking at the colour of something we definitely know.
+this by looking at the colour of something we definitely know. Cameras can also be calibrated for
+lens distortion with "chessboard"-type images. The parallel lines and constrasting squares make it
+easy to discern straight lines.
