@@ -239,7 +239,9 @@ frequency response ranges, etc.).
 
 ## Radiosity
 
-Brightness depends on: the amount of light hitting a surface (source intensity), the amount of light that leaves the surface (related to absorption rate), relative positions of light source and camera, and the orientation of the surface.
+Brightness depends on: the amount of light hitting a surface (source intensity), the amount of light
+that leaves the surface (related to absorption rate), relative positions of light source and camera,
+and the orientation of the surface.
 
 There are two different types of reflection: Lambertian and specular. On Lambertian surfaces, the
 brightness only depends on the angle between the light source and the surface. Specular reflection
@@ -302,13 +304,109 @@ $$
 \end{bmatrix}
 $$
 
+##### Tricks
 
-##### Sobel Tricks
-
-Combination of *horizontal* and *vertical* responses:
+Combination of *horizontal* and *vertical* edge responses:
 $$ S(x) = \sqrt{S_{h}(x)^2 + S_{v}(x)^2} $$
+where $S_{h}(x)$ are horizontal edges and $S_{v}(x)$ are vertical edges.
 
 Edge direction computation:
 $$ \theta(x) = tan^{-1}(S_{h}(x) / S_{v}(x)) $$
-
 *Note*: This computation is also useful in many other algorithms that involve edge direction.
+
+##### Problems
+
+* Edge thickening (for example, a 1px edge will be doubled)
+* Choice of threshold (at what point is a maxima an edge?)
+
+#### Zero-Crossing
+
+Zero-crossing edge detectors use the second derivative of the intensity gradient -- they are good
+edge detectors but amplify noise badly because they square any error ($\frac{d^{2}x}{dx^{2}}$).
+
+As with Sobel, we can combine the *horizontal* and *vertical* edge responses using the well-known
+"Laplacian". Zero-crossings of the Laplacian correspond strongly to edges.
+
+$$ \Delta^{2}\mathcal{I}(x,y) = \frac{\partial^{2}\mathcal{I}(x,y)}{dx^{2}} + \frac{\partial^{2}\mathcal{I}(x,y)}{dy^{2}} $$
+
+#### Gaussian
+
+Gaussians are used for lots of things in computer vision: (sort-of) noise removal, extraction of
+detail at various scales, and more. Gaussian blur of *x* and *y* is given by: $$ G(x, y) =
+\frac{1}{2\pi\sigma^{2}}\mathrm{e}^{-\frac{x^{2} + y^{2}}{2\sigma^{2}}} $$ where $\sigma$ is the
+*standard deviation* (essentially, the *blur radius*). However, as the data are digital, the blur is
+commonly implemented as a digital Gaussian kernel.
+
+##### Application to Second-Order Edge Detection
+
+1. Choose a small value for $\sigma$
+2. Blur the image with a Gaussian
+3. Filter with Laplacian -- zeroes are edges
+4. Increase $\sigma$ and go again -- to locate coarser edges
+5. Repeat and accumulate a "pyramid" of edge detections at different scales
+
+This roughly describes the LoG (Laplacian of Gaussians) edge detector. This is sometimes
+approximated with a DoG (Difference of Gaussians).
+
+#### The Canny Edge Detector
+
+Developed in 1986, probably still the most widely-used edge detector. Several parameters -- size of
+Gaussian filter and two thresholding parameters -- how likely the detector is to *find* an edge, and
+how likely it is to *follow* it.
+
+Key points:
+
+* First-order derivative
+* Iterated Gaussian blur at different scales
+* Directional first derivative
+* Non-maximal suppression (to suppress edge thickening)
+* Tracking (*hysterisis*) to link weak evidence to strong evidence
+
+### Edge Grouping (Edges to Contours)
+
+How to group detected edges into higher-level features (lines, circles, geometric shapes, or other
+models that we may have)?
+
+#### Line Fitting
+
+Generally because of noise, affine transformations in the image plane, and other things, edges are
+noisy and don't necessarily reflect reality -- so we have to use some kind of fitting model to group
+edge pixels into higher-level features.
+
+##### Least Squares
+
+Least squares (regression) fitting can help us by minimizing the sum of the squared error between
+our feature pixel group and our line model ($y = mx + c$), thus giving the line of best fit.
+
+##### Hough Transform
+
+<!-- https://www.youtube.com/watch?v=uDB2qGqnQ1g -->
+
+Useful for detecting any parametric curves (lines, curves, ellipses, circles, etc.). Very robust,
+and copes well with broken edges and noise. Given a set of edge points, the Hough transform will try
+to find the line equation that best explains the data.
+
+Given a point $(x, y)$, all lines that pass through it can be described by $y = mx + c$. We can
+rewrite that so that $c = -xm + y$ -- which is a line in the parameter space of *m* and *c*. So...
+
+![Hough lines using Cartesian coordinates](images/hough-cartesian.jpg)
+
+Given a set of points in $(x, y)$ space, we can draw all possible lines that pass through each point
+in *parameter space* -- $(m, c)$ space. The intersection of these lines in $(m, c)$ space gives us the
+*best* line that describes the set of points.
+
+The algorithm works like this:
+
+* An "accumulator array" is initialised $(A(m, c))$ to zero
+* For each edge element $(x, y)$, increment *all cells* in the accumulator array that satisfy
+  $c = -xm + y$
+* Local maxima (peaks) in $A(m, c)$ correspond to fitted lines
+
+However, the Cartesian representation of lines in Hough presents a problem with *perfectly vertical
+lines* -- the gradient ($m$) will tend to infinity and cause the algorithm to fail. We can get
+around this by using *polar coordinates* instead of *Cartesian coordinates*.
+
+A polar coordinate is represented as $\rho = x\sin{(\theta)} + y\sin{(\theta)}$. When a line in
+Hough is transformed from Cartesian to polar coordinate space, it becomes a sinusoidal curve -- but
+it is important to note that the principle of intersecting lines in $(m, c)$ space defining the
+best-fitting line in $(x, y)$ space remains the same.
