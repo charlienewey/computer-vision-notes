@@ -426,3 +426,71 @@ The algorithm works like this (on a simple level):
 * Rebuild model with best "consensus set"
 * Number of iterations can be estimated based on sample size, probability of outliers, error
   threshold, and other factors
+
+
+## Features
+
+A good feature is...^[From Tuytelaars and Mikolajczyk, 2007]
+
+* Repeatable (we can find it again)
+* Distinctive (it is distinctive enough from the rest of the image)
+* Local (it is small enough -- smaller than the image, for example)
+* Easy to find (there are enough of them for matching)
+* Accurate (it can pinpoint an object of interest with precision)
+* Efficient (it can be computed quickly)
+
+### Harris Corners (and KLT)
+
+Corners make great features. An an edge is a place where there's a change in intensity, and a corner
+is a place where edges meet. Corners are usually pretty distinct (and so is their neighbourhood),
+and they're usually fairly quick to find.
+
+Harris corner features don't just use the corners -- they also use features from the neighbourhood
+of the corner (a corner's neighbourhood will be relatively unique). Harris corners uses an "energy
+function", which has maxima where $(x, y)$ are values that cause the corner's neighbourhood to be
+most different.
+
+$$
+E(u, v) = \sum\_{(x, y)}{w(x,y)[I(x + u, y + v) - I(x, y)]^{2}}
+\_$$
+where $(u, v)$ describes a neighbourhood around a point $(x, y)$, where $w(x,y)$ is a window
+function (returns a 1 if a pixel is in the window, else 0 -- basically an "ignore everything outside
+of the window" function), where $I(x + u, y + v)$ is the intensity at pixel $(x, y)$, and where
+$I(x, y)$ is the intensity in the original pixel.
+
+An improved version of this algorithm has been worked on and improved  by a number of others,
+including Kanade, Lucas and Tomasi (and Shi). The algorithm names vary from "LK", to "KLT", to
+"KLTS", but they mean the same thing.
+
+### SIFT (Scale Invariant Feature Transform)
+
+SIFT is a great feature detection algorithm -- it finds features in such a way that they:
+
+* are invariant to scale
+* are invariant to rotation (in the image plane -- the $z$ direction)
+* are invariant to small translations and rotations in depth
+* contain a local description of the image
+
+SIFT (and various others based on it -- e.g. SURF) are considered to be state-of-the-art.
+
+Key points:
+
+* Gaussian pyramid (difference of Gaussians)
+* Difference between successive Gaussians gives the DoG
+* Extreme of the DoG in space and scale give the scale-invariant features
+
+Features are selected if they have good enough contrast, and they're on a corner (a peak of the
+DoG). It's also possible to do sub-pixel localisation of corners by fitting a quadratic model to the
+DoG.
+
+A 36-bin orientation histogram is created for each feature to represent Gaussian-weighted feature
+orientations. Features are created for each "major orientation" (peaks on the histogram) with their
+corresponding orientation.
+
+![SIFT features (and their orientation histograms)](images/sift.jpg)
+
+### SURF ("Speeded Up Robust Features")
+
+SURF is an algorithm extremely similar to SIFT -- the only major differences being a number of
+performance optimisations. Amongst other things, it uses box features instead of Laplacian of
+Gaussian filters.
