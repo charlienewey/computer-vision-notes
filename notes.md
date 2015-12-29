@@ -550,7 +550,7 @@ between "there is a face in this photo", and "that's Harrison Ford".
 * Features:
     * Haar features (essentially rectangles of light and dark areas in a certain arrangement)
     * Haar features are weak by themselves, so multiple Haar features are *boosted* (combined in a
-      *cascade*)
+      *cascade*) to build up the model
 * Speedups: The Viola-Jones face detector uses an *integral image* to calculate the sums of
   rectangles very quickly (each pixel contains the sum of all pixels above and to the left).
 
@@ -558,3 +558,71 @@ between "there is a face in this photo", and "that's Harrison Ford".
 
 The sum of the rectangle $ABCD$ in the integral image above is: $D - B - C + A$ ($A$ is added again because
 it gets subtracted twice).
+
+
+## Object Recognition
+
+### Homography
+
+If you look for close feature matches in a very similar geometric combination, you end up with
+object detection that uses *homography*.
+
+Essentially, a homography is a geometric relation describing the transformation of chosen points
+between two viewpoints. A homography uses a number of assumptions (for example, that the points lie
+on a planar surface -- which is not the case, for example, with faces -- which have sticky-outy
+things like noses and suchlike) to establish a model of the geometric relationship between the two
+images. This means that, while a homography can deal with *small transformations* in the image plane
+quite well, it generally doesn't work so well for *out-of-plane transformations*.
+
+In simpler language: the same scene viewed from two different pesspectives results in two *image
+planes*, and the transformation to turn one image plane into another is called a *homography*.
+
+A nice side-effect of using homography is that it will give you *approximate* (and I mean *really*
+approximate) surface orientation of the features.
+
+### Modelling In-Class Variation
+
+Homography is quite good for recognising *individual instances* of objects... but less good for
+detecting variation within an object class (i.e. sub-classes), and less good at coping with
+out-of-plane transformations.
+
+#### Bag of Words
+
+A popular framework for object recognition is the "Bag of Words" model.
+
+* Features are detected on a *large* training dataset
+* These features are clustered into *visual words*
+* An unordered set of *visual words* is created for each object class (this is the "bag")
+
+Key points:
+
+* Needs a large training set of labelled objects
+* *"Visual words"* are formed from clusters of features
+* Doesn't include information about spatial relationships between *visual words*
+
+### Honourable Mention
+
+* Deformable part-based models (essentially bag-of-words with some structure but with deformable
+  "springs" between *visual words* -- e.g., used for pedestrian detection)
+* 3D models (e.g. used for gait analysis or pose estimation)
+
+
+## Motion
+
+How do we find moving things? Two main ways: background subtraction and optical flow. Once moving
+things have been found, it's easy to group the pixels together into contiguous blobs of moving
+*stuff*.
+
+### Background Subtraction
+
+Dead easy, dead fast. There are some downsides, though:
+
+* Requires a static camera
+* Makes assumptions, too:
+    * Scene is (mostly) still
+    * Lighting doesn't change much (no flicker or rapid changes in illumination)
+
+#### Moving Average Background Subtraction
+
+
+### Mixture of Gaussians (GMM/MoG)
