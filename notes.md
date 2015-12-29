@@ -711,3 +711,31 @@ and more robust dense optical flow. Also known as "feature tracking".
 There is still a problem with this approach -- tracks can (and will) get lost (for example, if a
 keypoint leaves the frame). There needs to be some logic to decide when to drop keypoints, and when
 to reinitialise them when they come back.
+
+### Tracking and Modelling Motion
+
+With video, we'll often want to look at things happening across multiple frames. If you try to run a
+detector on every single frame... you'll probably have a bad time, because it likely isn't fast
+enough. More to the point, detections are probably also both noisy and computationally expensive.
+
+#### Tracking
+
+A general tracking framework:
+
+* Model: We have a prior idea about how something will change
+* Predict: Use this to make a prediction
+* Measure: Measure what actually happened
+* Update: Update the model
+
+Tracking is useful because it smoothes the data -- the estimate of an object's next location is
+based on *both* prediction and measurement. It's also useful because it helps give constraints to a
+visual search -- you can start looking for the target in the immediate neighbourhood of the
+prediction.
+
+#### Kalman Filter
+
+![Kalman filter](images/kalman-filter.png)
+
+#### Mean Shift
+
+##### CAMShift
