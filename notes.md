@@ -732,10 +732,35 @@ based on *both* prediction and measurement. It's also useful because it helps gi
 visual search -- you can start looking for the target in the immediate neighbourhood of the
 prediction.
 
+#### Difficulties with Tracking
+
+* Initialisation (sparse? dense? which features?)
+* Tracking multiple targets is difficult
+* Losing targets due to fast motion or occlusion (trackers can drift off target and targets can be
+  lost)
+* Losing target due to appearance change (e.g. large change in orientation)
+
 #### Kalman Filter
+
+Kalman filters are great for smoothing any series of data. It might be a series of $(x, y)$
+locations, sizes, colours, or anything else. A Kalman filter copes with jitter, noise, and missing
+information quite well.
 
 ![Kalman filter](images/kalman-filter.png)
 
 #### Mean Shift
 
+Another simple tracking idea -- place a window around the object that we want to track, and then
+iterate over the following steps:
+
+* Compute the mean of the data within the window
+* Calculate the mean for each window in the image
+* Return the window where the mean matches the target window
+
+This doesn't work well in practice. It's sensitive to noise, the window is liable to drift, and it
+just generally isn't very robust.
+
 ##### CAMShift
+
+CAMShift (Continually Adaptive Meanshift) is an improvement upon meanshift that can adapt the size
+of the window over time and uses a threshold for the mean.
