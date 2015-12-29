@@ -448,10 +448,9 @@ Harris corner features don't just use the corners -- they also use features from
 of the corner (a corner's neighbourhood will be relatively unique). Harris corners uses an "energy
 function", which has maxima where $(x, y)$ are values that cause the corner's neighbourhood to be
 most different.
-
 $$
-E(u, v) = \sum\_{(x, y)}{w(x,y)[I(x + u, y + v) - I(x, y)]^{2}}
-\_$$
+E(u, v) = \sum_{x, y}{w(x,y)[I(x + u, y + v) - I(x, y)]^{2}}
+$$ <!-- this is to stop markdown parser screwing up -_ -->
 where $(u, v)$ describes a neighbourhood around a point $(x, y)$, where $w(x,y)$ is a window
 function (returns a 1 if a pixel is in the window, else 0 -- basically an "ignore everything outside
 of the window" function), where $I(x + u, y + v)$ is the intensity at pixel $(x, y)$, and where
