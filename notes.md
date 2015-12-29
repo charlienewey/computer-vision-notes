@@ -450,7 +450,7 @@ function", which has maxima where $(x, y)$ are values that cause the corner's ne
 most different.
 $$
 E(u, v) = \sum_{x, y}{w(x,y)[I(x + u, y + v) - I(x, y)]^{2}}
-$$ <!-- this is to stop markdown parser screwing up -_ -->
+$$ <!-- this is to stop markdown parser freaking out -_ -->
 where $(u, v)$ describes a neighbourhood around a point $(x, y)$, where $w(x,y)$ is a window
 function (returns a 1 if a pixel is in the window, else 0 -- basically an "ignore everything outside
 of the window" function), where $I(x + u, y + v)$ is the intensity at pixel $(x, y)$, and where
@@ -608,20 +608,106 @@ Key points:
 
 ## Motion
 
-How do we find moving things? Two main ways: background subtraction and optical flow. Once moving
-things have been found, it's easy to group the pixels together into contiguous blobs of moving
-*stuff*.
+Often in computer vision, things of interest to us tend to move. How do we find moving things? Two
+main ways: background subtraction and optical flow. Once moving things have been found, it's easy to
+group the pixels together into contiguous blobs of *stuff*.
 
 ### Background Subtraction
 
+Deciding which pixels to track (or which pixels are interesting) involves deciding what is
+*background*, and what is *foreground*. We can use background subtraction for this, and there are
+several methods...
+
+#### Simple Background Subtraction
+
 Dead easy, dead fast. There are some downsides, though:
 
-* Requires a static camera
 * Makes assumptions, too:
     * Scene is (mostly) still
     * Lighting doesn't change much (no flicker or rapid changes in illumination)
 
+The calculation is simple:
+$$||I_{n} - I_{0}|| < t \implies \mathrm{background}$$
+$$||I_{n} - I_{0}|| >= t \implies \mathrm{foreground}$$
+where $t$ is an arbitrary threshold, where $I_{0}$ is a starting image, and $I_{n}$ is a subsequent
+image in a video feed. The threshold is used because sensors are noisy and won't always give a
+consistent reading.
+
 #### Moving Average Background Subtraction
 
+Lighting conditions and stuff that's in the background may change over time, so an adaptive
+background is obviously needed. The simplest form of this is a moving average. This form of
+background subtraction uses two parameters: $t$ (the threshold), and $w$ (the window size).
 
-### Mixture of Gaussians (GMM/MoG)
+The calculations are quite straightforward:
+$$||I_{n} - B_{n - 1}|| < t \implies \mathrm{background}$$
+$$||I_{n} - B_{n - 1}|| >= t \implies \mathrm{foreground}$$
+where
+$$B_{n - 1} = \frac{1}{w} \sum^{n - 1}_{j = (n - w)} I_{j}$$
+<!-- this is to stop the markdown parser freaking out -_ -->
+where
+$w$ is the window size (number of frames to average), and $B$ is the average of the last
+$(n - 1) - w$ frames.
+
+#### Mixture of Gaussians (GMM/MoG)
+
+The background subtraction methods described above are very simplistic. They don't deal with flicker
+well (actually, they don't deal with flicker *at all*), and they will still fail given particular
+noise patterns. More to the point, the mathematics above assumes a single colour channel (e.g.
+grayscale or similar) -- whereas in the real world, a 3D colour space will probably be used (e.g. a
+pixel will be a point in RGB space).
+
+Another problem is that variation is not constant, and even the moving average background
+subtraction doesn't cope well with noise. We can get around this by modelling noise as a Gaussian
+(as noise often obeys a normal distribution). In 2D, a Gaussian is defined by a mean and a standard
+deviation -- so instead of a constant threshold ($t$ above), we choose our threshold to be the width
+of the Gaussian (so pixels with a *lot* of noise have a high background threshold).
+
+But how to deal with flicker? That's hard. Dealing with Gaussians on one pixel is easy, but dealing
+with Gaussians on many pixels is... not so much. We have to use machine learning for this, and the
+most common technique is Expectation Maximisation.
+
+The result of combining these things is MoG background subtraction, which is great:
+
+* Deals with complex backgrounds
+* VERY robust to noise
+* Handles shadows well (can even detect them with an extra layer of classification)
+
+### Optical Flow
+
+*Motion field*: projection of motion of objects onto the image plane.
+
+*Optical flow*: apparent motion of brightness patterns in an image.
+
+Optical flow is only an *approximation* of the motion field. There are two major problems:
+
+* *Apparent motion*. A perfectly homogeneous rotating sphere seems static, but a static homogeneous
+  sphere with a moving light source will actually seem to rotate.
+* The *aperture problem*. Imagine a barber's pole. Optical flow will show vertical movement (the red
+  bars appear to move vertically), but the actual motion of the pole is a lateral rotation around
+  the $z$ axis. (Weirdly, this is also a problem for the human brain - our neurons only respond to
+  motion in a limited field).
+
+![Example optical flow of a barber's pole.](images/optical-flow.gif)
+
+#### Dense Optical Flow
+
+The general idea of determining dense optical flow is tracking the movement of image patches around
+each pixel in an image. For example, in a video sequence, points in the image will be tracked from
+frame to frame -- their new position will be calculated based upon nearby pixels with similar
+brightness. It is from this that the direction of travel will become apparent.
+
+This, however, involves some assumptions:
+
+* Rigidity: there is only one motion
+* Or smoothness: there are no discontinuities in motion
+
+#### Sparse Optical Flow
+
+Sparse optical flow is sort-of similar, but with carefully-chosen features (or keypoints), like SIFT
+or SURF. We find features that are easy to find again... and then find them again. This is faster
+and more robust dense optical flow. Also known as "feature tracking".
+
+There is still a problem with this approach -- tracks can (and will) get lost (for example, if a
+keypoint leaves the frame). There needs to be some logic to decide when to drop keypoints, and when
+to reinitialise them when they come back.
