@@ -326,7 +326,6 @@ edge detectors but amplify noise badly because they square any error ($\frac{d^{
 
 As with Sobel, we can combine the *horizontal* and *vertical* edge responses using the well-known
 "Laplacian". Zero-crossings of the Laplacian correspond strongly to edges.
-
 $$ \Delta^{2}\mathcal{I}(x,y) = \frac{\partial^{2}\mathcal{I}(x,y)}{dx^{2}} + \frac{\partial^{2}\mathcal{I}(x,y)}{dy^{2}} $$
 
 #### Gaussian
@@ -494,3 +493,68 @@ corresponding orientation.
 SURF is an algorithm extremely similar to SIFT -- the only major differences being a number of
 performance optimisations. Amongst other things, it uses box features instead of Laplacian of
 Gaussian filters.
+
+
+## Appearance and Patch-Based Methods
+
+Finding an object in an image is difficult. This can be done with geometric features (e.g. corners,
+as described above), but another way is using the appearance of image patches as features.
+
+The process is similar(ish) to convolution (dragging a mask over an image) -- a "patch" is dragged
+over the image and compared to the image underneath, looking for matches. Several measures can be
+made which describe matches -- the correlation coefficient, the Euclidean distance, or something
+else called "mutual information".
+
+### Notation and Constraints
+
+* $\mathcal{I}$: image
+* $\mathcal{A}$: image patch ("appearance")
+* $\mathcal{A} < \mathcal{I}$
+
+### Euclidean Distance
+
+Sum of squared differences, like so:
+$$ d(x, y) = \sqrt{\sum_{i}\sum_{j}[\mathcal{I}(x + i, y + j) - \mathcal{A}(i, j)]^{2}} $$
+
+### Correlation Coefficient
+
+<!-- https://www.youtube.com/watch?v=YjTod0R7cNE -->
+
+Correlation coefficient is better than Euclidean distance in some ways -- correlation is independent
+of overall brightness of images.  However, it's also slower than Euclidean distance. There are
+several types of correlation coefficient: Pearson's (fast to calculate, but assumes linearity),
+Spearman's (assumes a *monotonic* relationship, rather than simply linear), and Kendall's -- which
+simply compares concordance between pairs of data points without assuming structure.
+
+
+## Object Detection
+
+Object *detection* and object *recognition* (while similar), are distinct problems. Detection
+involves finding a class of objects in an image (that is, including *in-class* variation in a
+model), while recognition involves finding a particular subclass of a class, or a particular
+instance (that is, including *between-class* variation in a model). Essentially, it's the difference
+between "there is a face in this photo", and "that's Harrison Ford".
+
+### General Framework for Object Detection
+
+* Look at lots of examples of an object class
+* Extract some sort of features and represent them some way
+* Take the image that you're trying to find the object in
+* Represent that image in the same way as your model
+* Try to find similarity between your image and your model
+
+### Worked Example: The Viola-Jones Face Detector
+
+* Training data: 5,000 images of faces (positive examples) and 300,000,000 non-faces (negative
+  examples)
+* Features:
+    * Haar features (essentially rectangles of light and dark areas in a certain arrangement)
+    * Haar features are weak by themselves, so multiple Haar features are *boosted* (combined in a
+      *cascade*)
+* Speedups: The Viola-Jones face detector uses an *integral image* to calculate the sums of
+  rectangles very quickly (each pixel contains the sum of all pixels above and to the left).
+
+![An example integral image](images/integral-image.png)
+
+The sum of the rectangle $ABCD$ in the integral image above is: $D - B - C + A$ ($A$ is added again because
+it gets subtracted twice).
