@@ -868,9 +868,8 @@ information about our target object.
 
 ## Shape from Texture
 
-Look for repeating patterns on an object's surface (e.g. dimples on a golf ball), or parallel lines.
-These patterns then become textures. The way that these textures deform as the surface of the object
-changes can then be used to approximate the shape of the object's surface.
+Look for repeating patterns on an object's surface. The way that these textures deform as the
+surface of the object changes can then be used to approximate the shape of the object's surface.
 
 Terminology:
 
@@ -878,13 +877,11 @@ Terminology:
 * Homogeneous: the texture appears the same, no matter the orientation
 * Texel: an atomic element of a texture -- repeating this creates a texture
 
-There are many methods to detect and/or estimate the structure of texels -- among the most common
-are statistical methods for doing this (e.g. Markov Random Field, etc.).
+Among the most common methods for this are statistical methods such as Markov Random Fields.
 
 In the case of isotropic textures, a plane's $(p, q)$ gradients can be recovered by measuring the
-distortion of texels -- for example, circles may be projected as ellipses on a slanted surface.
-Assuming that these texels are indeed circular gives us the ability to work backwards and determine
-the slant and tilt of the surface from the *major axes* of the projected ellipses.
+distortion of texels -- for example, circles may be projected as ellipses on a slanted surface. We
+can determine the slant and tilt of the surface from the *major axes* of the projected ellipses.
 
 In the case of homogeneous textures, the shape is determined from the gradient of the texture
 elements. For example, in the instance of a surface with a dotted texture, a change in dot density
