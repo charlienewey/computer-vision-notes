@@ -36,7 +36,7 @@ the brain (linked to various cortices):
 * Dorsal stream: the "where" pathway (spatial relationships, and more)
 
 
-## Psychological vision
+## Psychological Vision
 
 ### Shortcuts
 
@@ -764,3 +764,103 @@ just generally isn't very robust.
 
 CAMShift (Continually Adaptive Meanshift) is an improvement upon meanshift that can adapt the size
 of the window over time and uses a threshold for the mean.
+
+
+## Shape
+
+Sometimes we are interested in recovering the 3D structure of objects and scenes -- for lots of
+reasons (e.g. "what's the surface of Mars like?", or digital preservation of historic monuments).
+
+### 2D to 3D is Hard
+
+Method                  Requirements
+---                     ---
+Shape from shading      1 image, 1 viewpoint, 1 light source, and lots of assumptions
+Photometric stereo      2+ images, 2+ light sources
+Shape from texture      1+ image(s), lots of assumptions
+Shape from motion       2+ images, moving object(s)
+Stereo vision           2+ images, 2+ viewpoints
+Depth cameras           2+ images, structured light source, 1 viewpoint
+
+### Shape from Shading
+
+The brightness of a given point in a scene depends on:
+
+* Location and orientation of light source(s)
+* Viewer location
+* Local orientation of surface
+* Properties of the surface
+
+Shape from shading has multiple uses, including creating texture maps of the Moon's surface (or
+Mars, in the case of the late Prof. Dave Barnes!). Essentially, by making certain assumptions about
+a surface (and its illumination), we can infer 3D structure.
+
+#### Bidirectional Reflectance Distribution Function
+
+A BRDF calculates the fraction of incident light reflected in the direction of the viewer.
+
+* $i$: incident angle
+* $e$: emittance angle
+* $g$: phase angle
+
+BRDF is largely a property of the *surface*; it defines how that surface interacts with light. It
+depends on the wavelength of the light and the properties of the object. In computer vision, it's
+often determined by taking lots of photos of a surface under precise lighting conditions.
+
+* Lambertian: $\phi(i, e, g) = \cos(i)$
+* Specular: $\phi(i, e, g) = 1$ when $i = e$ and $g = i + e$
+
+
+#### Surface Orientation
+
+The orientation of a surface can be described by a surface normal -- a vector that is perpendicular
+to both vectors on the planar part of an object's surface.
+
+We can describe normal vectors with two quantities:
+
+* The change in $Z$ as $X$ changes (called $p$)
+* The change in $Z$ as $Y$ changes (called $q$)
+
+##### Gradient Space
+
+Gradient space is useful because parallel planes map into a single point and a planes that are
+perpendicular to the viewing direction map to a point at the origin. Moving away from the origin
+essentially correspond to tilting and slanting the surface.
+
+$$p = \frac{\partial{z}}{\partial{x}}, q = \frac{\partial{z}}{\partial{y}}$$
+
+
+#### Reflectance Maps
+
+Usually displayed as iso-contours (lines on object along which light intensity is constant).
+
+![A sample reflectance map on a Lambertian sphere.](images/reflectance-map.png)
+
+#### Extracting Shape from Shading
+
+Given a reflectance map, a single image intensity gives us *a set* of possible orientations. Global
+solution is found by integration in gradient and image space. It is assumed that the object is
+smooth -- that the surface is uniform in texture and shape. The process involves lots of maths which
+aren't necessary to know.
+
+#### Photometric Stereo
+
+If we use a single image (and a single light source), we have to make a huge assumption
+(smoothness). We can reduce this if we have multiple images, perhaps under multiple lighting
+conditions. For this to work, the scene cannot move -- but that way, correspondence between points
+in different images is easy.
+
+##### Photometric Stereo Calibration
+
+If we have a sphere with roughly the same reflectance as our target object, it can be photographed
+under several lighting conditions. We can then use this information to further help us infer
+information about our target object.
+
+##### Photometric Stereo in a Nutshell
+
+* Illuminate the calibration sphere with one source at a time
+* Each illumination produces a different image of the sphere, so we have $N$ calibration images
+  ($I_{1}, ... , I_{n}$)
+* Each surface point with orientation $(p, q)$ produce its own grey level $G(I_{n})$ <!-- -_ -->
+* From this set of grey levels, generate a lookup table for gradient space, such that:
+  $[G(I_{1}), ..., G(I_{n})] \implies (p ,q)$
