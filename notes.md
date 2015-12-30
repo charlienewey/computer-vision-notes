@@ -336,7 +336,7 @@ detail at various scales, and more. Gaussian blur of *x* and *y* is given by: $$
 *standard deviation* (essentially, the *blur radius*). However, as the data are digital, the blur is
 commonly implemented as a digital Gaussian kernel.
 
-##### Application to Second-Order Edge Detection
+##### Second-Order Edge Detection
 
 1. Choose a small value for $\sigma$
 2. Blur the image with a Gaussian
@@ -427,7 +427,7 @@ The algorithm works like this (on a simple level):
   threshold, and other factors
 
 
-## Features
+# Features
 
 A good feature is...^[From Tuytelaars and Mikolajczyk, 2007]
 
@@ -438,7 +438,7 @@ A good feature is...^[From Tuytelaars and Mikolajczyk, 2007]
 * Accurate (it can pinpoint an object of interest with precision)
 * Efficient (it can be computed quickly)
 
-### Harris Corners (and KLT)
+## Harris Corners (and KLT)
 
 Corners make great features. An an edge is a place where there's a change in intensity, and a corner
 is a place where edges meet. Corners are usually pretty distinct (and so is their neighbourhood),
@@ -460,7 +460,7 @@ An improved version of this algorithm has been worked on and improved  by a numb
 including Kanade, Lucas and Tomasi (and Shi). The algorithm names vary from "LK", to "KLT", to
 "KLTS", but they mean the same thing.
 
-### SIFT (Scale Invariant Feature Transform)
+## SIFT (Scale Invariant Feature Transform)
 
 SIFT is a great feature detection algorithm -- it finds features in such a way that they:
 
@@ -487,14 +487,14 @@ corresponding orientation.
 
 ![SIFT features (and their orientation histograms)](images/sift.jpg)
 
-### SURF ("Speeded Up Robust Features")
+## SURF ("Speeded Up Robust Features")
 
 SURF is an algorithm extremely similar to SIFT -- the only major differences being a number of
 performance optimisations. Amongst other things, it uses box features instead of Laplacian of
 Gaussian filters.
 
 
-## Appearance and Patch-Based Methods
+# Appearance and Patch-Based Methods
 
 Finding an object in an image is difficult. This can be done with geometric features (e.g. corners,
 as described above), but another way is using the appearance of image patches as features.
@@ -504,18 +504,18 @@ over the image and compared to the image underneath, looking for matches. Severa
 made which describe matches -- the correlation coefficient, the Euclidean distance, or something
 else called "mutual information".
 
-### Notation and Constraints
+## Notation and Constraints
 
 * $\mathcal{I}$: image
 * $\mathcal{A}$: image patch ("appearance")
 * $\mathcal{A} < \mathcal{I}$
 
-### Euclidean Distance
+## Euclidean Distance
 
 Sum of squared differences, like so:
 $$ d(x, y) = \sqrt{\sum_{i}\sum_{j}[\mathcal{I}(x + i, y + j) - \mathcal{A}(i, j)]^{2}} $$
 
-### Correlation Coefficient
+## Correlation Coefficient
 
 <!-- https://www.youtube.com/watch?v=YjTod0R7cNE -->
 
@@ -526,7 +526,7 @@ Spearman's (assumes a *monotonic* relationship, rather than simply linear), and 
 simply compares concordance between pairs of data points without assuming structure.
 
 
-## Object Detection
+# Object Detection
 
 Object *detection* and object *recognition* (while similar), are distinct problems. Detection
 involves finding a class of objects in an image (that is, including *in-class* variation in a
@@ -534,7 +534,7 @@ model), while recognition involves finding a particular subclass of a class, or 
 instance (that is, including *between-class* variation in a model). Essentially, it's the difference
 between "there is a face in this photo", and "that's Harrison Ford".
 
-### General Framework for Object Detection
+## General Framework for Object Detection
 
 * Look at lots of examples of an object class
 * Extract some sort of features and represent them some way
@@ -542,7 +542,7 @@ between "there is a face in this photo", and "that's Harrison Ford".
 * Represent that image in the same way as your model
 * Try to find similarity between your image and your model
 
-### Worked Example: The Viola-Jones Face Detector
+## Worked Example: The Viola-Jones Face Detector
 
 * Training data: 5,000 images of faces (positive examples) and 300,000,000 non-faces (negative
   examples)
@@ -559,9 +559,9 @@ The sum of the rectangle $ABCD$ in the integral image above is: $D - B - C + A$ 
 it gets subtracted twice).
 
 
-## Object Recognition
+# Object Recognition
 
-### Homography
+## Homography
 
 If you look for close feature matches in a very similar geometric combination, you end up with
 object detection that uses *homography*.
@@ -579,13 +579,13 @@ planes*, and the transformation to turn one image plane into another is called a
 A nice side-effect of using homography is that it will give you *approximate* (and I mean *really*
 approximate) surface orientation of the features.
 
-### Modelling In-Class Variation
+## Modelling In-Class Variation
 
 Homography is quite good for recognising *individual instances* of objects... but less good for
 detecting variation within an object class (i.e. sub-classes), and less good at coping with
 out-of-plane transformations.
 
-#### Bag of Words
+### Bag of Words
 
 A popular framework for object recognition is the "Bag of Words" model.
 
@@ -599,26 +599,26 @@ Key points:
 * *"Visual words"* are formed from clusters of features
 * Doesn't include information about spatial relationships between *visual words*
 
-### Honourable Mention
+## Honourable Mention
 
 * Deformable part-based models (essentially bag-of-words with some structure but with deformable
   "springs" between *visual words* -- e.g., used for pedestrian detection)
 * 3D models (e.g. used for gait analysis or pose estimation)
 
 
-## Motion
+# Motion
 
 Often in computer vision, things of interest to us tend to move. How do we find moving things? Two
 main ways: background subtraction and optical flow. Once moving things have been found, it's easy to
 group the pixels together into contiguous blobs of *stuff*.
 
-### Background Subtraction
+## Background Subtraction
 
 Deciding which pixels to track (or which pixels are interesting) involves deciding what is
 *background*, and what is *foreground*. We can use background subtraction for this, and there are
 several methods...
 
-#### Simple Background Subtraction
+### Simple Background Subtraction
 
 Dead easy, dead fast. There are some downsides, though:
 
@@ -633,7 +633,7 @@ where $t$ is an arbitrary threshold, where $I_{0}$ is a starting image, and $I_{
 image in a video feed. The threshold is used because sensors are noisy and won't always give a
 consistent reading.
 
-#### Moving Average Background Subtraction
+### Moving Average Background Subtraction
 
 Lighting conditions and stuff that's in the background may change over time, so an adaptive
 background is obviously needed. The simplest form of this is a moving average. This form of
@@ -649,7 +649,7 @@ where
 $w$ is the window size (number of frames to average), and $B$ is the average of the last
 $(n - 1) - w$ frames.
 
-#### Mixture of Gaussians (GMM/MoG)
+### Mixture of Gaussians (GMM/MoG)
 
 The background subtraction methods described above are very simplistic. They don't deal with flicker
 well (actually, they don't deal with flicker *at all*), and they will still fail given particular
@@ -673,7 +673,7 @@ The result of combining these things is MoG background subtraction, which is gre
 * VERY robust to noise
 * Handles shadows well (can even detect them with an extra layer of classification)
 
-### Optical Flow
+## Optical Flow
 
 *Motion field*: projection of motion of objects onto the image plane.
 
@@ -690,7 +690,7 @@ Optical flow is only an *approximation* of the motion field. There are two major
 
 ![Example optical flow of a barber's pole.](images/optical-flow.gif)
 
-#### Dense Optical Flow
+### Dense Optical Flow
 
 The general idea of determining dense optical flow is tracking the movement of image patches around
 each pixel in an image. For example, in a video sequence, points in the image will be tracked from
@@ -702,7 +702,7 @@ This, however, involves some assumptions:
 * Rigidity: there is only one motion
 * Or smoothness: there are no discontinuities in motion
 
-#### Sparse Optical Flow
+### Sparse Optical Flow
 
 Sparse optical flow is sort-of similar, but with carefully-chosen features (or keypoints), like SIFT
 or SURF. We find features that are easy to find again... and then find them again. This is faster
@@ -712,13 +712,13 @@ There is still a problem with this approach -- tracks can (and will) get lost (f
 keypoint leaves the frame). There needs to be some logic to decide when to drop keypoints, and when
 to reinitialise them when they come back.
 
-### Tracking and Modelling Motion
+## Tracking and Modelling Motion
 
 With video, we'll often want to look at things happening across multiple frames. If you try to run a
 detector on every single frame... you'll probably have a bad time, because it likely isn't fast
 enough. More to the point, detections are probably also both noisy and computationally expensive.
 
-#### Tracking
+### Tracking
 
 A general tracking framework:
 
@@ -732,7 +732,7 @@ based on *both* prediction and measurement. It's also useful because it helps gi
 visual search -- you can start looking for the target in the immediate neighbourhood of the
 prediction.
 
-#### Difficulties with Tracking
+### Difficulties with Tracking
 
 * Initialisation (sparse? dense? which features?)
 * Tracking multiple targets is difficult
@@ -740,7 +740,7 @@ prediction.
   lost)
 * Losing target due to appearance change (e.g. large change in orientation)
 
-#### Kalman Filter
+### Kalman Filter
 
 Kalman filters are great for smoothing any series of data. It might be a series of $(x, y)$
 locations, sizes, colours, or anything else. A Kalman filter copes with jitter, noise, and missing
@@ -748,7 +748,7 @@ information quite well.
 
 ![Kalman filter](images/kalman-filter.png)
 
-#### Mean Shift
+### Mean Shift
 
 Another simple tracking idea -- place a window around the object that we want to track, and then
 iterate over the following steps:
@@ -760,29 +760,29 @@ iterate over the following steps:
 This doesn't work well in practice. It's sensitive to noise, the window is liable to drift, and it
 just generally isn't very robust.
 
-##### CAMShift
+#### CAMShift
 
 CAMShift (Continually Adaptive Meanshift) is an improvement upon meanshift that can adapt the size
 of the window over time and uses a threshold for the mean.
 
 
-## Shape
+# Shape
 
 Sometimes we are interested in recovering the 3D structure of objects and scenes -- for lots of
 reasons (e.g. "what's the surface of Mars like?", or digital preservation of historic monuments).
 
-### 2D to 3D is Hard
+## 2D to 3D is Hard
 
 Method                  Requirements
 ---                     ---
-Shape from shading      1 image, 1 viewpoint, 1 light source, and lots of assumptions
+Shape from shading      1 image, 1 viewpoint, 1 light source
 Photometric stereo      2+ images, 2+ light sources
 Shape from texture      1+ image(s), lots of assumptions
 Shape from motion       2+ images, moving object(s)
 Stereo vision           2+ images, 2+ viewpoints
-Depth cameras           2+ images, structured light source, 1 viewpoint
+Depth cameras           2+ images, 1 light source, 1 viewpoint
 
-### Shape from Shading
+## Shape from Shading
 
 The brightness of a given point in a scene depends on:
 
@@ -795,9 +795,10 @@ Shape from shading has multiple uses, including creating texture maps of the Moo
 Mars, in the case of the late Prof. Dave Barnes!). Essentially, by making certain assumptions about
 a surface (and its illumination), we can infer 3D structure.
 
-#### Bidirectional Reflectance Distribution Function
+### BRDF
 
-A BRDF calculates the fraction of incident light reflected in the direction of the viewer.
+A BRDF (bidirectional reflectance distribution function) calculates the fraction of incident light
+reflected in the direction of the viewer.
 
 * $i$: incident angle
 * $e$: emittance angle
@@ -811,7 +812,7 @@ often determined by taking lots of photos of a surface under precise lighting co
 * Specular: $\phi(i, e, g) = 1$ when $i = e$ and $g = i + e$
 
 
-#### Surface Orientation
+### Surface Orientation
 
 The orientation of a surface can be described by a surface normal -- a vector that is perpendicular
 to both vectors on the planar part of an object's surface.
@@ -821,7 +822,7 @@ We can describe normal vectors with two quantities:
 * The change in $Z$ as $X$ changes (called $p$)
 * The change in $Z$ as $Y$ changes (called $q$)
 
-##### Gradient Space
+#### Gradient Space
 
 Gradient space is useful because parallel planes map into a single point and a planes that are
 perpendicular to the viewing direction map to a point at the origin. Moving away from the origin
@@ -830,33 +831,33 @@ essentially correspond to tilting and slanting the surface.
 $$p = \frac{\partial{z}}{\partial{x}}, q = \frac{\partial{z}}{\partial{y}}$$
 
 
-#### Reflectance Maps
+### Reflectance Maps
 
 Usually displayed as iso-contours (lines on object along which light intensity is constant).
 
 ![A sample reflectance map on a Lambertian sphere.](images/reflectance-map.png)
 
-#### Extracting Shape from Shading
+### Extracting Shape from Shading
 
 Given a reflectance map, a single image intensity gives us *a set* of possible orientations. Global
 solution is found by integration in gradient and image space. It is assumed that the object is
 smooth -- that the surface is uniform in texture and shape. The process involves lots of maths which
 aren't necessary to know.
 
-#### Photometric Stereo
+### Photometric Stereo
 
 If we use a single image (and a single light source), we have to make a huge assumption
 (smoothness). We can reduce this if we have multiple images, perhaps under multiple lighting
 conditions. For this to work, the scene cannot move -- but that way, correspondence between points
 in different images is easy.
 
-##### Photometric Stereo Calibration
+#### Stereo Calibration
 
 If we have a sphere with roughly the same reflectance as our target object, it can be photographed
 under several lighting conditions. We can then use this information to further help us infer
 information about our target object.
 
-##### Photometric Stereo in a Nutshell
+#### In a Nutshell
 
 * Illuminate the calibration sphere with one source at a time
 * Each illumination produces a different image of the sphere, so we have $N$ calibration images
@@ -864,3 +865,58 @@ information about our target object.
 * Each surface point with orientation $(p, q)$ produce its own grey level $G(I_{n})$ <!-- -_ -->
 * From this set of grey levels, generate a lookup table for gradient space, such that:
   $[G(I_{1}), ..., G(I_{n})] \implies (p ,q)$
+
+## Shape from Texture
+
+Look for repeating patterns on an object's surface (e.g. dimples on a golf ball), or parallel lines.
+These patterns then become textures. The way that these textures deform as the surface of the object
+changes can then be used to approximate the shape of the object's surface.
+
+Terminology:
+
+* Isotropic: rotation perpendicular to the texture plane doesn't change the texture's appearance
+* Homogeneous: the texture appears the same, no matter the orientation
+* Texel: an atomic element of a texture -- repeating this creates a texture
+
+There are many methods to detect and/or estimate the structure of texels -- among the most common
+are statistical methods for doing this (e.g. Markov Random Field, etc.).
+
+In the case of isotropic textures, a plane's $(p, q)$ gradients can be recovered by measuring the
+distortion of texels -- for example, circles may be projected as ellipses on a slanted surface.
+Assuming that these texels are indeed circular gives us the ability to work backwards and determine
+the slant and tilt of the surface from the *major axes* of the projected ellipses.
+
+In the case of homogeneous textures, the shape is determined from the gradient of the texture
+elements. For example, in the instance of a surface with a dotted texture, a change in dot density
+indicates a change in orientation.
+
+Both of these methods can be applied locally (as well as globally to a notional plane), but all of
+these methods assume some degree of homogeneity in the texture -- which may not be the case.
+
+## Shape from Motion
+
+For example, doing live 3D tracking on a live human, or gait analysis. Ullman (1979) did work on
+shape from long-range motion. Two large assumptions are made (parallel projection and rigidity,
+although a small amount of deformation is allowed). The initial shape is assumed to be flat,
+therefore giving initial distances between points, and then on each subsequent frame, the distances
+between points are updated so as to minimise their change. Shape can be derived from this.
+
+## Shape from Occlusions
+
+Contours can be discovered due to discontinuities in depth of an object -- which often correspond to
+silhouettes. Full of assumptions...
+
+* Each point on the contour corresponds to a single point on the object
+* Nearby points on contours correspond to nearby points on the object
+* Points on the contour correspond to planar points on the object
+
+Silhouette from a viewpoint results in a generalised cone containing the object -- the object is the
+intersection of several generalised cones. Examining from different viewpoints and iteratively
+removing background is commonly known as *space carving*.
+
+## Shape from Focal Length
+
+Most lenses usually have a variable focus and a limited depth of field. By choosing a lens with a
+narrow depth of field, the "blurriness" of certain parts of the image can be calculated. By doing
+this, we can work out which parts of the image are in focus, and therefore, roughly how far away
+they are.
