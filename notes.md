@@ -917,3 +917,186 @@ Most lenses usually have a variable focus and a limited depth of field. By choos
 narrow depth of field, the "blurriness" of certain parts of the image can be calculated. By doing
 this, we can work out which parts of the image are in focus, and therefore, roughly how far away
 they are.
+
+
+# 3D
+
+## Stereo Vision
+
+Stereo vision is used by both humand and animals. We can do this computationally too, but it's a
+difficult problem -- in fact, there is still research happening.
+
+### Finding Correspondences
+
+It's difficult to find conjugate pairs (corresponding points in the world) between two images. 3D
+reconstruction involves establishing 3D coordinates from 2D correspondences.
+
+How to do it? Do we match areas by appearance? By features? By motion flow? The problem is that
+scene elements don't always look the same in two images -- whether by differences in the camera,
+viewpoint (orientation, for example), by illumination conditions, or other stuff.
+
+### Epipolar Geometry
+
+Terminology:
+
+* Epipoles (or epipolar points): projection of the focal point of one camera onto the other camera's
+  image plane ($e_{L}$ and $e_{r}$)
+* Epipolar plane: the plane defined by $(O_{L}, X_{L})$ and the focal point of the other camera
+  $(O_{R})$ <!-- -_ -->
+* Epipolar line: intersection between the epipolar plane and the image plane of the other camera
+
+Possible matches for pixels lie on the epipolar line, constraining our search!
+
+So how do we find the epipolar line? It's simple of both images are in the same plane, but if not,
+we can simulate their alignment (rectification). There are other techniques (ordering,
+minimum/maximum disparity, local continuity (smoothness) -- but these aren't always valid.
+
+### Matching
+
+More viewpoints means more matching information... which means additional epipolar constraints. This
+(sometimes) results in more confident matching points.
+
+Scenes can be matched in a dense way (where every pixel has a matching pixel), or a sparse way
+(where only "important" keypoints have a matching pixel and in-between distances are interpolated).
+
+### Depth Estimation
+
+The depth ($d$) of point $P$ is given by:
+$$d(P) = \frac{Bf}{x - x'}$$
+where $(x - x')$ is the *disparity*.
+
+![A diagram explaining the relationships between the quantities](images/depth-estimation.png)
+
+### Trade-Offs
+
+* Short baseline ($B$ in above diagram): easier matching, fewer occlusions, lower accuracy
+* Long baseline: difficult matching, more occlusions, higher accuracy
+
+### Calibration
+
+* Transforming a real camera into a perfect pinhole camera ("intrinsic parameters").
+* Finding the geometry of a stereo camera system (*extrinsic parameters*)
+
+#### Intrinsic Parameters
+
+Linear transformation to represent focal length, image format (aspect ratio, etc), and principal
+point (points along the principal planes of the lens that cross the optical axis). A non-linear
+transformation can be used to represent *lens distortions*.
+
+#### Extrinsic Parameters
+
+Linear transformation to represent the translation and rotation between the two cameras.
+
+#### Finding the Parameters
+
+There are lots of ways to find these parameters -- including the use of calibration targets,
+optimisation of parameters, stochastic methods, and so on.
+
+### The Fundamental Matrix
+
+The fundamental matrix ($F$) is an affine transformation that satisfies $x^{T}Fx' = 0$, where $x$
+and $x'$ are the matrices representing each camera/viewpoint. $F$ is a $3 x 3$, rank 2 matrix (it
+has a *rank deficiency*), that represents the transformation between the two cameras. It needs 7
+matching points in a scene to solve it (or 8 in some circumstances). Given enough matching pairs
+(usually more than 8 in practice -- due to noise, etc), we can solve for the fundamental matrix.
+The maths is horrible, though.
+
+## Structure from Motion
+
+Until now, we've thought of stereo as two separate cameras working simultaneously. So how about
+using a moving camera? This solves a few problems for us (we know the camera parameters and only
+have to solve them once) but we know longer know $B$ (the baseline).
+
+![A sample scene demonstrating a structure from motion setup](images/structure-from-motion.png)
+
+It has been used for multiple things -- including camera tracking and building 3D environment
+models. It's useful for camera tracking because we know the focal length and parameters of the
+(single) camera that we use for this. However, it's mostly an offline process because it's so darn
+slow. The Bundler application is quite interesting too -- modelling cities from Internet photo
+collections. It collects images, extracts the EXIF data from the images (includes focal length data,
+etc), matches features, and tries to align the images. This process is also slow -- about a week for
+1000 images.
+
+### Traditional Stereo vs SfM
+
+Traditional stereo:
+
+* Calibrated stereo rig
+* Gives an estimate of depth either densely or sparsely
+* Works well -- in fact, can run in real-time
+
+Structure from motion:
+
+* Uncalibrated cameras of various different types
+* Gives an estimate of 3D structure
+* Sparse structure, slow as all heck (not real-time)
+* Images from different cameras will have different colour profiles -- this needs to be calibrated
+
+## Active 3D
+
+Active 3D (or "3D vision") helps to mitigate the difficulty of binocular vision. Size ahd shape of
+an object can be directly computed from its 3D coordinates (and objects can be rendered very
+precisely, very easily).
+
+A range sensor is used to acquire range data. There are many types -- ultrasonic, laser, LiDAR, etc.
+Range sensors may measure depth at a single point, surface profiles (i.e. depth across a single
+line), or full surface information.
+
+For example, a common laser range sensor is made by Leica -- the HDS is a profile scanner that uses
+a (very fast) spinning mirror to measure large scenes quite quickly. It has very good resolution --
+3mm at 89 metres away!
+
+Another common active 3D sensor is the Kinect. It projects an infrared speckle pattern and then
+measures the interference with that pattern to determine 3D structure (shape from texture?). It's
+pretty accurate too, considering the low cost.
+
+### Egocentricity
+
+Both the Kinect and the Leica systems described above give an egocentric view of the world -- that
+is, the 3D model of the world generated by both of these systems only contains what can be seen by
+the device. This presents a problem, for example, with *occlusion*. If a target object is occluded,
+shape data will not be recoverable. There are different types of occlusion with an egocentric sensor
+-- laser occlusion (where the laser doesn't reach an area seen by the camera) and sensor occlusion
+(where the camera doesn't see an area reached by the camera).
+
+If you want to get a good model of the world, you need to do multiple scans and *register them*
+(join them together). You can do this by using similar techniques to stereo vision, or simply by
+putting markers in the scene.
+
+### Representation of Range Data
+
+Two basic forms of range data:
+
+* $xyz$ form -- point cloud (unstructured)
+    * A list of 3D coordinates in a scene without specific order
+* $rij$ form -- (structured)
+    * A matrix of depth values of points along the $xy$ axes -- the points are ordered
+
+Rendering a point cloud is fairly straightforward, though -- simply triangulate the neighbouring
+points and render triangles connecting the individual points.
+
+### Range Image Registration
+
+If multiple images have been taken of a scene and there are two overlapping range images captured
+from nearby viewpoints, the transformation that (most effectively) aligns the two images must be
+derived. This can be made easier by assuming *rigidity* (that the distance between two given points
+on a surface doesn't change between the images). Rigid transformations work well if the object is
+rigid, the views are close together, and there are no major occlusions in the images.
+
+### Iterative Closest Point Algorithm
+
+What happens when the transformation between two point clouds is small? You can use the Iterative
+Closest Point algorithm:
+
+* Guess/estimate transformation matrix
+* Establish point correspondences
+* Evaluate point correspondences
+* Estimate transformation parameters again
+* Evaluate -- if it's good enough, finish. If not, loop to step 2.
+
+ICP is easy(ish) to implement -- and it doesn't require feature extraction or image segmentation.
+It's *reasonably* computationally performant -- approx $O(n \log n)$ if a k-d tree is used.
+
+However, it's sensitive to occlusion and spurious appearance or disappearance of points. Moreover,
+it coverges to a *local* minimum -- not a *global* minimum. There are also difficulties with
+estimating the termination conditions and initial guesses at the underlying transformation.
